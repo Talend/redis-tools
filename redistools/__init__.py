@@ -126,8 +126,17 @@ def sync():
     redis_instance = RedisInstance(config['redis_endpoint'])
     redis_target_instance = RedisInstance(config['redis_target_endpoint'])
 
-    new_keys = compare_keys(config['redis_namespace'], redis_instance, redis_target_instance)
+    # Enable watch mode to run the same command at regular interval
+    watch_mode = True
 
+    while watch_mode:
+        new_keys = compare_keys(config['redis_namespace'], redis_instance, redis_target_instance)
+
+        # Sleep if interval is set or exit watch mode
+        if config['interval'] > 0:
+            time.sleep(config['interval'])
+        else:
+            watch_mode = False
 
 if __name__ == '__main__':
     sync()
