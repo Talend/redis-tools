@@ -6,7 +6,7 @@ requirements:
 
 clean:
 	find . -name '*.pyc' -delete
-	rm -r build/ dist/ *.egg-info
+	-rm -r build/ dist/ *.egg-info
 
 lint:
 	tox
@@ -16,3 +16,4 @@ install: clean requirements lint
 
 docker: clean lint
 	docker build -t redis-tools .
+
