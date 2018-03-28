@@ -192,5 +192,39 @@ def sync():
         else:
             watch_mode = False
 
+
+def monitor():
+    """
+    Monitor Redis instances
+    :return:
+    """
+
+    # Initialize configuration
+    config = get_config()
+
+    # Initialize source Redis Instance
+    redis_instance = RedisInstance(config['redis_endpoint'])
+
+    # Enable watch mode to run the same command at regular interval
+    watch_mode = True
+
+    while watch_mode:
+        # List keys
+        source_keys = redis_instance.list_keys(config['redis_namespace'])
+        logging.info('Keys for Redis Source {0}: {1}'.format(redis_instance.get_endpoint(), source_keys))
+
+        # Initialize target Redis
+        if config['redis_target_endpoint'] != 'none':
+            redis_target_instance = RedisInstance(config['redis_target_endpoint'])
+            target_keys = redis_target_instance.list_keys(config['redis_namespace'])
+            logging.info('Keys for Redis Target {0}: {1}'.format(redis_target_instance.get_endpoint(), target_keys))
+
+        # Sleep if interval is set or exit watch mode
+        if config['interval'] > 0:
+            time.sleep(config['interval'])
+        else:
+            watch_mode = False
+
+
 if __name__ == '__main__':
     sync()

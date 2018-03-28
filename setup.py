@@ -13,6 +13,7 @@ setup(
     entry_points={
         'console_scripts': [
             'redis-sync = redistools:sync',
+            'redis-monitor = redistools:monitor',
         ]
     }
 )
