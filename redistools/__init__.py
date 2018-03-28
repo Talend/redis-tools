@@ -69,6 +69,50 @@ class RedisInstance(object):
         logging.debug('Keys: {0}'.format(keys))
         return keys
 
+    def get_keys(self, keys):
+        """
+        Get Redis keys detail
+        """
+
+        keys_detailed = []
+
+        for k in keys:
+            # Get key name, value and ttl
+            key = {'key': k, 'value': self._redis.get(k), 'ttl': self._redis.ttl(k)}
+            logging.debug('Key: {}, Value: {}, TTL: {}'.format(key['key'], key['value'], key['ttl']))
+            keys_detailed.append(key)
+
+        logging.debug('Keys: {0}'.format(keys_detailed))
+        return keys_detailed
+
+    def set_keys(self, keys):
+        """
+        Insert Redis keys from list
+        """
+
+        # Use pipeline for performance (https://github.com/andymccurdy/redis-py/blob/master/README.rst#pipelines)
+        pipe = self._redis.pipeline()
+
+        for k in keys:
+            # Get key name, value and ttl
+            name, value, ttl = k.values()
+
+            # Add key to pipeline
+            logging.debug('Add to pipeline: key: {}, value: {}'.format(name, value))
+            pipe.set(name, value)
+
+            # Add expire to pipeline
+            if ttl > 0:
+                logging.debug('Add to pipeline: key: {}, ttl: {}'.format(name, ttl))
+                pipe.expire(name, ttl)
+
+        # Execute pipeline
+        if pipe.__len__() > 0:
+            logging.info('Execute pipeline with {0} tasks'.format(pipe.__len__()))
+            pipe.execute()
+        else:
+            logging.info('Pipeline empty, nothing to execute')
+
 
 def get_config():
     """
@@ -131,6 +175,16 @@ def sync():
 
     while watch_mode:
         new_keys = compare_keys(config['redis_namespace'], redis_instance, redis_target_instance)
+
+        # Do nothing in dry run mode
+        if config['dry_run'] != "yes":
+            # Start copy keys only if there in new keys to copy
+            if len(new_keys) > 0:
+                logging.info('New key to add on {0}'.format(redis_target_instance.get_endpoint()))
+                keys_detailed = redis_instance.get_keys(new_keys)
+                redis_target_instance.set_keys(keys_detailed)
+            else:
+                logging.info('Every keys are already existing in {}'.format(redis_target_instance.get_endpoint()))
 
         # Sleep if interval is set or exit watch mode
         if config['interval'] > 0:
