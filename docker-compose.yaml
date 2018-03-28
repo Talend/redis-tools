@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+
+  redis-sync:
+    image: redis-tools:latest
+    command: redis-sync
+    environment:
+      - DRY_RUN=no
+      - INTERVAL=10
+      - LOG_LEVEL=INFO
+      - REDIS_ENDPOINT=redis-source:6379
+      - REDIS_NAMESPACE=ns:*
+      - REDIS_TARGET_ENDPOINT=redis-target:6379
+
+  redis-source:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  redis-target:
+    image: redis:latest
+    ports:
+      - 6380:6379
