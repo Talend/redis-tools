@@ -102,3 +102,10 @@ ENV/
 
 # intellij / pycharm
 .idea/
+
+# vim
+*.swp
+
+# emacs
+*~
+
