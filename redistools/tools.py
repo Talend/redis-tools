@@ -65,10 +65,7 @@ def sync():
     redis_instance = RedisInstance(config['redis_endpoint'])
     redis_target_instance = RedisInstance(config['redis_target_endpoint'])
 
-    # Enable watch mode to run the same command at regular interval
-    watch_mode = True
-
-    while watch_mode:
+    while True:
         new_keys = compare_keys(config['redis_namespace'], redis_instance, redis_target_instance)
 
         # Do nothing in dry run mode
@@ -81,11 +78,11 @@ def sync():
             else:
                 logging.info('Every keys are already existing in {}'.format(redis_target_instance.get_endpoint()))
 
-        # Sleep if interval is set or exit watch mode
+        # Sleep if interval is set or exit
         if config['interval'] > 0:
             time.sleep(config['interval'])
         else:
-            watch_mode = False
+            break
 
 
 def monitor():
@@ -100,10 +97,7 @@ def monitor():
     # Initialize source Redis Instance
     redis_instance = RedisInstance(config['redis_endpoint'])
 
-    # Enable watch mode to run the same command at regular interval
-    watch_mode = True
-
-    while watch_mode:
+    while True:
         # List keys
         source_keys = redis_instance.list_keys(config['redis_namespace'])
         logging.info('Keys for Redis Source {0}: {1}'.format(redis_instance.get_endpoint(), source_keys))
@@ -114,8 +108,8 @@ def monitor():
             target_keys = redis_target_instance.list_keys(config['redis_namespace'])
             logging.info('Keys for Redis Target {0}: {1}'.format(redis_target_instance.get_endpoint(), target_keys))
 
-        # Sleep if interval is set or exit watch mode
+        # Sleep if interval is set or exit
         if config['interval'] > 0:
             time.sleep(config['interval'])
         else:
-            watch_mode = False
+            break
