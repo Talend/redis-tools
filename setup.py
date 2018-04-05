@@ -12,8 +12,8 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'redis-sync = redistools:sync',
-            'redis-monitor = redistools:monitor',
+            'redis-sync = redistools.tools:sync',
+            'redis-monitor = redistools.tools:monitor',
         ]
     }
 )
