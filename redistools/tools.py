@@ -46,9 +46,9 @@ def compare_keys(namespace, redis_instance, redis_target_instance):
     new_keys = source_keys.difference(target_keys)
 
     if len(new_keys) > 0:
-        logging.debug('New keys: {0}'.format(new_keys))
+        logging.info('New keys: {0}'.format(new_keys))
     else:
-        logging.debug('No new keys found on {0}'.format(redis_instance.get_endpoint()))
+        logging.info('No new keys found on {0}'.format(redis_instance.get_endpoint()))
 
     return new_keys
 
